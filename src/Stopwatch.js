@@ -5,15 +5,16 @@ class Stopwatch extends Component {
   constructor() {
     super();
     this.state = {
-      hours: "00",
-      minutes: "00",
-      seconds: "00",
-      milliseconds: "000",
-      time: 0
+      startTime: null,
+      clock: "0:00:00.000"
     };
   }
 
   start() {
+    clearInterval(this.stopwatch);
+    this.setState({
+      startTime: new Date().getTime()
+    });
     this.stopwatch = setInterval(() => {
       this.update();
     }, 1);
@@ -24,45 +25,36 @@ class Stopwatch extends Component {
   }
 
   reset() {
+    this.stop();
     this.setState({
-      hours: "00",
-      minutes: "00",
-      seconds: "00",
-      milliseconds: "000",
-      time: 0
+      startTime: null,
+      clock: "0:00:00.000"
     });
   }
 
   update() {
-    const time = this.state.time + 1;
-    const hours = parseInt(time / 1000 / 60 / 60, 10);
-    const minutes = parseInt((time / 1000 / 60) % 60, 10);
-    const seconds = parseInt((time / 1000) % 60, 10);
-    const milliseconds = parseInt(time % 1000, 10);
+    const currentTime = new Date().getTime();
+    const duration = currentTime - this.state.startTime;
+    const millisec = (duration % 1000).toString().padStart(3, "0");
+    const seconds = (Math.trunc(duration / 1000) % 60)
+      .toString()
+      .padStart(2, "0");
+    const minutes = (Math.trunc(duration / 1000 / 60) % 60)
+      .toString()
+      .padStart(2, "0");
+    const hours = Math.trunc(duration / 1000 / 60 / 60).toString();
+
+    const clock = hours + ":" + minutes + ":" + seconds + "." + millisec;
 
     this.setState({
-      hours: this.toText(hours),
-      minutes: this.toText(minutes),
-      seconds: this.toText(seconds),
-      milliseconds: milliseconds,
-      time: time
+      clock: clock
     });
-  }
-
-  toText(time) {
-    return ("00" + time).slice(-2);
   }
 
   render() {
     return (
       <div>
-        <StopwatchText>{this.state.hours}</StopwatchText>
-        <StopwatchText>:</StopwatchText>
-        <StopwatchText>{this.state.minutes}</StopwatchText>
-        <StopwatchText>:</StopwatchText>
-        <StopwatchText>{this.state.seconds}</StopwatchText>
-        <StopwatchText>.</StopwatchText>
-        <StopwatchText>{this.state.milliseconds}</StopwatchText>
+        <StopwatchText>{this.state.clock}</StopwatchText>
       </div>
     );
   }
